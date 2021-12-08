@@ -2,7 +2,12 @@
 
 基于`C#`实现的获取微信数据库密钥的小工具。
 
+![poc](https://raw.githubusercontent.com/AirEvan/SharpKey/main/demo.png)
 
+
+
+* 暂时不支持微信多开场景的密钥获取。
+* 需微信登录后才可抓取密钥。
 
 
 
