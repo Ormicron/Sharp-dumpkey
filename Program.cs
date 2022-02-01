@@ -71,11 +71,27 @@ namespace wechatDumpKey
             IntPtr basePtr = IntPtr.Zero;
             IntPtr padding = IntPtr.Zero;
             int ver3 = int.Parse(ver.Split('.')[3]);
+            if (ver.StartsWith("3.5.0"))
+            {
+                if (ver3 == 33)
+                {
+                    padding = (IntPtr)0x21DE374;
+                }
+                else if (ver3 == 29)
+                {
+                    padding = (IntPtr)0x21DD334;
+                }
+            }
+
             if (ver.StartsWith("3.4.0"))
             {
-                if(ver3 == 38)
+                if (ver3 == 38)
                 {
                     padding = (IntPtr)0x1E2417C;
+                }
+                else if (ver3 == 54)
+                {
+                    padding = (IntPtr)0x1E3BBA4;
                 }
             }
 
