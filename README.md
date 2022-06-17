@@ -1,4 +1,4 @@
-# sharpKey
+# sharp-dumpKey
 
 基于`C#`实现的获取微信数据库密钥的小工具，可配合[`chatViewTool`](https://github.com/Ormicron/chatViewTool)使用。
 
