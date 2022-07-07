@@ -9,7 +9,7 @@
 * 暂时不支持微信多开场景的密钥获取。
 * 需微信登录后才可抓取密钥。
 * 程序未采用动态获取基址的方式，因此为保证程序可用性，运行时会在线拉取基址。
-* 难免存在小版本基址遗漏，欢迎RP-[Address.json](https://github.com/Ormicron/Sharp-dumpkey/blob/main/Address.json)
+* 难免存在小版本基址遗漏，欢迎PR-[Address.json](https://github.com/Ormicron/Sharp-dumpkey/blob/main/Address.json)
 
 
 
