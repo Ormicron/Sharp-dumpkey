@@ -177,7 +177,7 @@ namespace wechatDumpKey
 
                     try
                     {
-                        String outPutName = @"C:\Windows\Temp\DBPass.Bin";
+                        String outPutName = @"DBPass.Bin";
                         String buf = "0x" + BitConverter.ToString(keyBuf).Replace("-", ",0x");
                             //StreamWriter sr = new StreamWriter(outPutName, false, Encoding.Unicode);
                         StreamWriter sr = new StreamWriter(outPutName, false);
@@ -185,7 +185,7 @@ namespace wechatDumpKey
                         sr.Flush();
                         sr.Close();
 
-                        Console.WriteLine("[*] Save To File " + outPutName);
+                        Console.WriteLine("[*] Save To File: " + outPutName);
                     }
                     catch (IOException e)
                     {
