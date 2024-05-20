@@ -1,3 +1,6 @@
+# 声明:
+**该工具长期未更新维护，多数情况下已无法满足使用需求，目前已有多个其他同类型的优秀开源项目。本工具私有版/外部版本均已停止开发。**
+
 # sharp-dumpKey
 
 基于`C#`实现的获取微信数据库密钥的小工具，可配合[`chatViewTool`](https://github.com/Ormicron/chatViewTool)使用。
